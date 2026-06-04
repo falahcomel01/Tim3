@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ShoppingCart, X, Star } from 'lucide-react';
+import { ShoppingCart, X, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 
 function formatRupiah(number) {
   return new Intl.NumberFormat('id-ID', {
@@ -9,8 +9,132 @@ function formatRupiah(number) {
   }).format(number);
 }
 
+// ─── Helper: ambil semua URL gambar dari produk ───────────────────────────────
+function getImages(product) {
+  if (product.images?.length) {
+    return product.images.map((img) =>
+      img.url.startsWith('http') ? img.url : `http://localhost:8000${img.url}`
+    );
+  }
+  if (product.image) return [product.image];
+  return ['https://via.placeholder.com/300'];
+}
+
+// ─── Sub-komponen: Image Slider ───────────────────────────────────────────────
+function ImageSlider({ images, aspectRatio = '4/3', maxHeight }) {
+  const [index, setIndex] = useState(0);
+  const [imgError, setImgError] = useState(false);
+
+  const prev = (e) => {
+    e.stopPropagation();
+    setIndex((i) => (i === 0 ? images.length - 1 : i - 1));
+  };
+
+  const next = (e) => {
+    e.stopPropagation();
+    setIndex((i) => (i === images.length - 1 ? 0 : i + 1));
+  };
+
+  return (
+    <div
+      style={{
+        position: 'relative',
+        width: '100%',
+        aspectRatio: maxHeight ? undefined : aspectRatio,
+        height: maxHeight ?? undefined,
+        background: 'rgba(255,255,255,0.04)',
+        overflow: 'hidden',
+      }}
+    >
+      {!imgError ? (
+        <img
+          key={images[index]}
+          src={images[index]}
+          alt={`foto ${index + 1}`}
+          onError={() => setImgError(true)}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block',
+          }}
+        />
+      ) : (
+        <div
+          style={{
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <span style={{ fontSize: '40px' }}>👕</span>
+        </div>
+      )}
+
+      {/* Tombol prev/next — hanya muncul jika lebih dari 1 foto */}
+      {images.length > 1 && (
+        <>
+          <button
+            onClick={prev}
+            aria-label="Foto sebelumnya"
+            style={{
+              position: 'absolute', left: '8px', top: '50%',
+              transform: 'translateY(-50%)',
+              background: 'rgba(0,0,0,0.5)', border: 'none',
+              borderRadius: '50%', width: '32px', height: '32px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', color: '#fff', zIndex: 2,
+            }}
+          >
+            <ChevronLeft size={18} />
+          </button>
+
+          <button
+            onClick={next}
+            aria-label="Foto berikutnya"
+            style={{
+              position: 'absolute', right: '8px', top: '50%',
+              transform: 'translateY(-50%)',
+              background: 'rgba(0,0,0,0.5)', border: 'none',
+              borderRadius: '50%', width: '32px', height: '32px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', color: '#fff', zIndex: 2,
+            }}
+          >
+            <ChevronRight size={18} />
+          </button>
+
+          {/* Dot indicator */}
+          <div
+            style={{
+              position: 'absolute', bottom: '8px', width: '100%',
+              display: 'flex', justifyContent: 'center', gap: '5px', zIndex: 2,
+            }}
+          >
+            {images.map((_, i) => (
+              <span
+                key={i}
+                onClick={(e) => { e.stopPropagation(); setIndex(i); }}
+                style={{
+                  width: '6px', height: '6px', borderRadius: '50%',
+                  background: i === index ? '#f59e0b' : 'rgba(255,255,255,0.4)',
+                  cursor: 'pointer', transition: 'background 0.2s',
+                }}
+              />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ─── Modal ────────────────────────────────────────────────────────────────────
 function ProductModal({ product, onClose }) {
-  const [selectedSize, setSelectedSize] = useState('L');
+  const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] ?? 'L');
+  const images = getImages(product);
 
   return (
     <div
@@ -32,7 +156,6 @@ function ProductModal({ product, onClose }) {
           width: '100%',
           maxWidth: '860px',
           display: 'flex',
-          gap: '0',
           overflow: 'hidden',
           position: 'relative',
         }}
@@ -51,19 +174,14 @@ function ProductModal({ product, onClose }) {
           <X size={18} />
         </button>
 
-        {/* Gambar */}
+        {/* Gambar — pakai ImageSlider */}
         <div style={{ flex: '0 0 45%', maxWidth: '45%' }}>
-          <img
-            src={product.image}
-            alt={product.name}
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          />
+          <ImageSlider images={images} maxHeight="100%" aspectRatio={undefined} />
         </div>
 
         {/* Info */}
         <div style={{ flex: 1, padding: '32px 28px', overflowY: 'auto', maxHeight: '85vh' }}>
 
-          {/* Badge */}
           {product.badge && (
             <div style={{
               display: 'inline-block',
@@ -74,17 +192,14 @@ function ProductModal({ product, onClose }) {
             </div>
           )}
 
-          {/* Nama */}
           <h2 style={{ margin: '0 0 12px', fontSize: '26px', fontWeight: 800, color: '#ffffff', lineHeight: 1.2 }}>
             {product.name}
           </h2>
 
-          {/* Harga */}
           <div style={{ fontSize: '22px', fontWeight: 800, color: '#f59e0b', marginBottom: '12px' }}>
             {formatRupiah(product.price)}
           </div>
 
-          {/* Rating */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '16px' }}>
             {[...Array(5)].map((_, i) => (
               <Star
@@ -97,18 +212,16 @@ function ProductModal({ product, onClose }) {
             <span style={{ fontSize: '13px', color: '#94a3b8' }}>({product.reviews} ulasan pembeli)</span>
           </div>
 
-          {/* Deskripsi */}
           <p style={{ fontSize: '14px', color: '#94a3b8', lineHeight: 1.7, marginBottom: '24px' }}>
             {product.description}
           </p>
 
-          {/* Pilih Ukuran */}
           <div style={{ marginBottom: '24px' }}>
             <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '1px', color: '#64748b', marginBottom: '10px' }}>
               PILIH UKURAN KAOS:
             </p>
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-            {(product.sizes || []).map((size) => (
+              {(product.sizes || []).map((size) => (
                 <button
                   key={size}
                   onClick={() => setSelectedSize(size)}
@@ -128,7 +241,6 @@ function ProductModal({ product, onClose }) {
             </div>
           </div>
 
-          {/* Spesifikasi */}
           <div style={{ marginBottom: '28px' }}>
             <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '1px', color: '#64748b', marginBottom: '10px' }}>
               SPESIFIKASI KAOS:
@@ -143,7 +255,6 @@ function ProductModal({ product, onClose }) {
             </div>
           </div>
 
-          {/* Stok */}
           <div style={{ marginBottom: '20px' }}>
             <span style={{
               fontSize: '12px', fontWeight: 600,
@@ -155,7 +266,6 @@ function ProductModal({ product, onClose }) {
             </span>
           </div>
 
-          {/* Tombol */}
           <button
             disabled={product.stock === 0}
             style={{
@@ -177,12 +287,13 @@ function ProductModal({ product, onClose }) {
   );
 }
 
+// ─── ProductCard ──────────────────────────────────────────────────────────────
 export default function ProductCard({ product }) {
-  const [imgError, setImgError] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
   const isOutOfStock = product.stock === 0;
+  const images = getImages(product);
 
   return (
     <>
@@ -205,30 +316,13 @@ export default function ProductCard({ product }) {
           flexDirection: 'column',
         }}
       >
-        {/* Image */}
-        <div style={{
-          position: 'relative', width: '100%', aspectRatio: '4/3',
-          background: 'rgba(255,255,255,0.04)', overflow: 'hidden',
-        }}>
-          {!imgError ? (
-            <img
-              src={product.image}
-              alt={product.name}
-              onError={() => setImgError(true)}
-              style={{
-                width: '100%', height: '100%', objectFit: 'cover',
-                transition: 'transform 0.3s',
-                transform: hovered ? 'scale(1.05)' : 'scale(1)',
-              }}
-            />
-          ) : (
-            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ fontSize: '40px' }}>👕</span>
-            </div>
-          )}
+        {/* Image Slider */}
+        <div style={{ position: 'relative' }}>
+          <ImageSlider images={images} aspectRatio="4/3" />
 
+          {/* Badge kategori */}
           <div style={{
-            position: 'absolute', top: '10px', left: '10px',
+            position: 'absolute', top: '10px', left: '10px', zIndex: 3,
             background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)',
             borderRadius: '20px', padding: '3px 10px',
             fontSize: '11px', fontWeight: 600, color: '#f59e0b',
@@ -236,22 +330,37 @@ export default function ProductCard({ product }) {
             {product.category}
           </div>
 
+          {/* Overlay stok habis */}
           {isOutOfStock && (
             <div style={{
-              position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)',
+              position: 'absolute', inset: 0, zIndex: 3,
+              background: 'rgba(0,0,0,0.6)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              <span style={{ background: '#ef4444', color: '#fff', fontSize: '12px', fontWeight: 700, padding: '4px 12px', borderRadius: '20px' }}>Habis</span>
+              <span style={{
+                background: '#ef4444', color: '#fff',
+                fontSize: '12px', fontWeight: 700,
+                padding: '4px 12px', borderRadius: '20px',
+              }}>
+                Habis
+              </span>
             </div>
           )}
         </div>
 
         {/* Content */}
         <div style={{ padding: '14px 16px 16px', display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
-          <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#ffffff', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <h3 style={{
+            margin: 0, fontSize: '15px', fontWeight: 700, color: '#ffffff',
+            lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}>
             {product.name}
           </h3>
-          <p style={{ margin: 0, fontSize: '12px', color: '#64748b', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+          <p style={{
+            margin: 0, fontSize: '12px', color: '#64748b', lineHeight: 1.5,
+            display: '-webkit-box', WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical', overflow: 'hidden',
+          }}>
             {product.description}
           </p>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
@@ -268,7 +377,7 @@ export default function ProductCard({ product }) {
           </div>
           <button
             disabled={isOutOfStock}
-            onClick={(e) => { e.stopPropagation(); }}
+            onClick={(e) => e.stopPropagation()}
             style={{
               marginTop: '6px', width: '100%', padding: '10px',
               borderRadius: '10px', border: 'none',

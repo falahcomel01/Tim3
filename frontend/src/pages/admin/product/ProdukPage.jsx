@@ -1,33 +1,79 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import ProductTable from '../../../components/admin/product/ProductTable';
 import ProductForm from '../../../components/admin/product/ProductForm';
 import ProdukDeleteModal from '../../../components/admin/product/ProdukDeleteModal';
+import { getProducts, createProduct, updateProduct, deleteProduct } from '../../../services/productService';
+// ── TAMBAHAN: import service kategori ──
+import { getCategories } from '../../../services/categoryService';
 
 export default function ProdukPage() {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts]               = useState([]);
+  const [categories, setCategories]           = useState([]); // <-- baru
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [productToDelete, setProductToDelete] = useState(null);
+  const [loading, setLoading]                 = useState(true);
 
-  const handleSubmit = (form) => {
-    if (!form) {
+  // ── TAMBAHAN: fetch categories sekali saat mount ──
+  useEffect(() => {
+    getCategories()
+      .then(res => {
+        // Sesuaikan dengan bentuk response API kamu:
+        // { data: { data: [...] } }  atau  { data: [...] }
+        const d = res.data?.data;
+        setCategories(d?.data ?? d ?? []);
+      })
+      .catch(() => console.warn('Gagal memuat kategori.'));
+  }, []);
+
+  const fetchProducts = useCallback(() => {
+    setLoading(true);
+    getProducts({ per_page: 100 })
+      .then(res => {
+        const d = res.data?.data;
+        setProducts(d?.data ?? d ?? []);
+      })
+      .catch(() => alert('Gagal memuat produk.'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => { fetchProducts(); }, [fetchProducts]);
+
+  const handleSubmit = async (form) => {
+    if (!form) { setSelectedProduct(null); return; }
+    try {
+      if (selectedProduct) {
+        await updateProduct(selectedProduct.id, form);
+      } else {
+        await createProduct(form);
+      }
       setSelectedProduct(null);
-      return;
+      fetchProducts();
+    } catch (err) {
+      const errors  = err.response?.data?.errors;
+      const message = err.response?.data?.message;
+      if (errors) {
+        const detail = Object.values(errors).flat().join('\n');
+        alert('Validasi gagal:\n' + detail);
+      } else {
+        alert(message ?? 'Gagal menyimpan produk.');
+      }
     }
-    if (selectedProduct) {
-      setProducts(products.map(p =>
-        p.id === selectedProduct.id ? { ...form, id: selectedProduct.id } : p
-      ));
-    } else {
-      setProducts([...products, { ...form, id: Date.now() }]);
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deleteProduct(productToDelete.id);
+      setProductToDelete(null);
+      fetchProducts();
+    } catch {
+      alert('Gagal menghapus produk.');
     }
-    setSelectedProduct(null);
   };
 
   return (
     <div style={{ padding: '24px', minHeight: '100vh', background: '#08090c' }}>
       <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
 
-        {/* Header */}
         <div style={{ marginBottom: '24px' }}>
           <h1 style={{
             margin: '0 0 4px',
@@ -43,23 +89,23 @@ export default function ProdukPage() {
           </p>
         </div>
 
+        {/* ── TAMBAHAN: pass categories ke ProductForm ── */}
         <ProductForm
           product={selectedProduct}
           onSubmit={handleSubmit}
+          categories={categories}
         />
 
         <ProductTable
           products={products}
+          loading={loading}
           onEdit={(product) => setSelectedProduct(product)}
           onDelete={(product) => setProductToDelete(product)}
         />
 
         <ProdukDeleteModal
           product={productToDelete}
-          onConfirm={() => {
-            setProducts(products.filter(p => p.id !== productToDelete.id));
-            setProductToDelete(null);
-          }}
+          onConfirm={handleDelete}
           onCancel={() => setProductToDelete(null)}
         />
       </div>

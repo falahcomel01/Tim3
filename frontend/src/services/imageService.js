@@ -1,14 +1,28 @@
-import api from './api';
+import axios from 'axios';
 
+const API = '/api';
+
+/**
+ * Upload gambar produk.
+ * Body: FormData dengan field `image` (file).
+ * Endpoint: POST /products/{product}/images
+ */
 export const uploadImage = (productId, formData) =>
-  api.post(`/products/${productId}/images`, formData, {
+  axios.post(`${API}/products/${productId}/images`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 
-export const updateImage = (productId, imageId, formData) =>
-  api.put(`/products/${productId}/images/${imageId}`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
+/**
+ * Perbarui data gambar (misal: set is_primary, sort_order).
+ * Body: { url?, is_primary?, sort_order? }
+ * Endpoint: PUT /products/{product}/images/{image}
+ */
+export const updateImage = (productId, imageId, data) =>
+  axios.put(`${API}/products/${productId}/images/${imageId}`, data);
 
+/**
+ * Hapus gambar produk.
+ * Endpoint: DELETE /products/{product}/images/{image}
+ */
 export const deleteImage = (productId, imageId) =>
-  api.delete(`/products/${productId}/images/${imageId}`);
+  axios.delete(`${API}/products/${productId}/images/${imageId}`);

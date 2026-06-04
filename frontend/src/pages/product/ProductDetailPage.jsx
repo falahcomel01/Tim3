@@ -1,200 +1,261 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { getProduct } from '../../services/productService';
+import { useEffect, useState } from "react";
+import { Search } from "lucide-react";
+import ProductCard from "../../components/product/ProductCard";
+import { getProducts } from "../../services/productService";
 
-export default function ProductDetailPage() {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const [product, setProduct] = useState(null);
+export default function ProductListPage() {
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [activeImage, setActiveImage] = useState(0);
+
+  const [search, setSearch] = useState("");
+  const [activeCategory, setActiveCategory] = useState("Semua");
 
   useEffect(() => {
-    getProduct(id)
-      .then(res => setProduct(res.data.data ?? res.data))
-      .catch(() => setError('Gagal memuat produk.'))
-      .finally(() => setLoading(false));
-  }, [id]);
+    fetchProducts();
+  }, []);
 
-  if (loading) return <div style={styles.center}><div style={styles.spinner} /></div>;
-  if (error)   return <div style={styles.errorBox}>{error}</div>;
-  if (!product) return null;
+  const fetchProducts = async () => {
+    try {
+      const res = await getProducts();
 
-  const images = product.images || [];
-  const variants = product.variants || [];
-  const categories = product.categories || [];
+      const rawProducts =
+        res.data?.data?.data ||
+        res.data?.data ||
+        [];
+
+      const formattedProducts = rawProducts.map((product) => {
+        const primaryImage =
+          product.images?.find((img) => img.is_primary) ||
+          product.images?.[0];
+
+        return {
+          ...product,
+
+          image: primaryImage?.url
+            ? `http://localhost:8000${primaryImage.url}`
+            : null,
+
+          category:
+            product.categories?.[0]?.name ||
+            "Umum",
+
+          sizes: [
+            ...new Set(
+              (product.variants || []).map((v) =>
+                v.name?.split(" - ")[0]
+              )
+            ),
+          ],
+
+          specs:
+            product.variants?.map(
+              (v) =>
+                `${v.name} | Stok ${v.stock}`
+            ) || [],
+
+          rating: 5,
+          reviews: 0,
+        };
+      });
+
+      setProducts(formattedProducts);
+    } catch (err) {
+      console.error(err);
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const categories = [
+    "Semua",
+    ...new Set(
+      products.flatMap((p) =>
+        (p.categories || []).map((c) => c.name)
+      )
+    ),
+  ];
+
+  const filtered = products.filter((p) => {
+    const matchSearch =
+      p.name
+        ?.toLowerCase()
+        .includes(search.toLowerCase());
+
+    const matchCategory =
+      activeCategory === "Semua" ||
+      (p.categories || []).some(
+        (c) => c.name === activeCategory
+      );
+
+    return matchSearch && matchCategory;
+  });
+
+  if (loading) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          background: "#08090c",
+          color: "#fff",
+        }}
+      >
+        Loading...
+      </div>
+    );
+  }
 
   return (
-    <div style={styles.page}>
-      {/* Back */}
-      <button style={styles.backBtn} onClick={() => navigate('/admin/products')}>
-        ← Kembali ke Daftar Produk
-      </button>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "#08090c",
+        padding: "40px 24px",
+      }}
+    >
+      <div
+        style={{
+          maxWidth: "1200px",
+          margin: "0 auto",
+        }}
+      >
+        <div style={{ marginBottom: "32px" }}>
+          <h1
+            style={{
+              margin: "0 0 6px",
+              fontSize: "28px",
+              fontWeight: 800,
+              color: "#ffffff",
+            }}
+          >
+            Semua Produk
+          </h1>
 
-      <div style={styles.layout}>
-        {/* Kiri: Gambar */}
-        <div style={styles.imageSection}>
-          <div style={styles.mainImageWrap}>
-            {images.length > 0 ? (
-              <img
-                src={images[activeImage]?.url || images[activeImage]?.image_url}
-                alt={product.name}
-                style={styles.mainImage}
-                onError={e => { e.target.src = 'https://via.placeholder.com/400'; }}
+          <p
+            style={{
+              margin: 0,
+              fontSize: "14px",
+              color: "#64748b",
+            }}
+          >
+            {filtered.length} produk tersedia
+          </p>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "12px",
+            marginBottom: "32px",
+          }}
+        >
+          <div
+            style={{
+              position: "relative",
+              flex: 1,
+              minWidth: "250px",
+            }}
+          >
+            <Search
+              size={15}
+              style={{
+                position: "absolute",
+                left: "12px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                color: "#64748b",
+              }}
+            />
+
+            <input
+              type="text"
+              placeholder="Cari produk..."
+              value={search}
+              onChange={(e) =>
+                setSearch(e.target.value)
+              }
+              style={{
+                width: "100%",
+                padding: "10px 14px 10px 36px",
+                background: "#121318",
+                border:
+                  "1px solid rgba(255,255,255,0.08)",
+                borderRadius: "10px",
+                color: "#fff",
+              }}
+            />
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "8px",
+            }}
+          >
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() =>
+                  setActiveCategory(cat)
+                }
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: "20px",
+                  border: "1px solid",
+                  borderColor:
+                    activeCategory === cat
+                      ? "#f59e0b"
+                      : "rgba(255,255,255,0.1)",
+                  background:
+                    activeCategory === cat
+                      ? "rgba(245,158,11,0.15)"
+                      : "transparent",
+                  color:
+                    activeCategory === cat
+                      ? "#f59e0b"
+                      : "#94a3b8",
+                  cursor: "pointer",
+                }}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {filtered.length > 0 ? (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns:
+                "repeat(auto-fill,minmax(250px,1fr))",
+              gap: "20px",
+            }}
+          >
+            {filtered.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
               />
-            ) : (
-              <div style={styles.noImage}>Tidak ada gambar</div>
-            )}
+            ))}
           </div>
-          {images.length > 1 && (
-            <div style={styles.thumbRow}>
-              {images.map((img, i) => (
-                <img
-                  key={img.id}
-                  src={img.url || img.image_url}
-                  alt=""
-                  style={{
-                    ...styles.thumb,
-                    ...(i === activeImage ? styles.thumbActive : {})
-                  }}
-                  onClick={() => setActiveImage(i)}
-                  onError={e => { e.target.src = 'https://via.placeholder.com/72'; }}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Kanan: Info */}
-        <div style={styles.infoSection}>
-          {/* Kategori */}
-          <div style={styles.catRow}>
-            {categories.length > 0
-              ? categories.map(c => <span key={c.id} style={styles.catBadge}>{c.name}</span>)
-              : <span style={{ color: '#94a3b8', fontSize: 13 }}>Tanpa kategori</span>
-            }
+        ) : (
+          <div
+            style={{
+              textAlign: "center",
+              color: "#64748b",
+              padding: "100px 0",
+            }}
+          >
+            Produk tidak ditemukan
           </div>
-
-          <h1 style={styles.productName}>{product.name}</h1>
-
-          <div style={styles.priceRow}>
-            <span style={styles.price}>
-              {product.price
-                ? `Rp ${Number(product.price).toLocaleString('id-ID')}`
-                : 'Harga belum diset'}
-            </span>
-            <span style={styles.stock}>Stok: {product.stock ?? '—'}</span>
-          </div>
-
-          {product.description && (
-            <div style={styles.descSection}>
-              <h3 style={styles.sectionTitle}>Deskripsi</h3>
-              <p style={styles.desc}>{product.description}</p>
-            </div>
-          )}
-
-          {/* Varian */}
-          {variants.length > 0 && (
-            <div style={styles.variantSection}>
-              <h3 style={styles.sectionTitle}>Varian ({variants.length})</h3>
-              <div style={styles.variantGrid}>
-                {variants.map(v => (
-                  <div key={v.id} style={styles.variantCard}>
-                    <div style={styles.variantName}>{v.name}</div>
-                    <div style={styles.variantValue}>{v.value}</div>
-                    {v.price && (
-                      <div style={styles.variantPrice}>
-                        +Rp {Number(v.price).toLocaleString('id-ID')}
-                      </div>
-                    )}
-                    {v.stock !== undefined && (
-                      <div style={styles.variantStock}>Stok: {v.stock}</div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Actions */}
-          <div style={styles.actions}>
-            <button
-              style={styles.btnEdit}
-              onClick={() => navigate(`/admin/products/${id}/edit`)}
-            >
-              Edit Produk
-            </button>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
 }
-
-const styles = {
-  page: { padding: '32px 24px', fontFamily: 'sans-serif', color: '#1e293b' },
-  backBtn: {
-    background: 'none', border: 'none', color: '#64748b',
-    cursor: 'pointer', fontSize: 14, marginBottom: 20, display: 'block',
-  },
-  layout: { display: 'flex', gap: 40, flexWrap: 'wrap' },
-  imageSection: { flex: '0 0 400px', maxWidth: 400 },
-  mainImageWrap: {
-    width: '100%', aspectRatio: '1', background: '#f8fafc',
-    borderRadius: 12, overflow: 'hidden', border: '1px solid #e2e8f0',
-  },
-  mainImage: { width: '100%', height: '100%', objectFit: 'cover' },
-  noImage: {
-    width: '100%', height: '100%', display: 'flex',
-    alignItems: 'center', justifyContent: 'center',
-    color: '#94a3b8', fontSize: 14,
-  },
-  thumbRow: { display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' },
-  thumb: {
-    width: 72, height: 72, objectFit: 'cover',
-    borderRadius: 8, border: '2px solid #e2e8f0', cursor: 'pointer',
-  },
-  thumbActive: { border: '2px solid #2563eb' },
-  infoSection: { flex: 1, minWidth: 280 },
-  catRow: { display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
-  catBadge: {
-    background: '#eff6ff', color: '#2563eb', borderRadius: 99,
-    padding: '4px 12px', fontSize: 12, fontWeight: 600,
-  },
-  productName: { fontSize: 28, fontWeight: 800, margin: '0 0 16px', lineHeight: 1.2 },
-  priceRow: { display: 'flex', alignItems: 'center', gap: 20, marginBottom: 20 },
-  price: { fontSize: 24, fontWeight: 700, color: '#2563eb' },
-  stock: {
-    background: '#f0fdf4', color: '#16a34a',
-    borderRadius: 8, padding: '4px 12px', fontSize: 13, fontWeight: 600,
-  },
-  descSection: { marginBottom: 24, paddingBottom: 24, borderBottom: '1px solid #f1f5f9' },
-  sectionTitle: { fontSize: 14, fontWeight: 700, color: '#374151', marginBottom: 8 },
-  desc: { fontSize: 14, color: '#64748b', lineHeight: 1.7, margin: 0 },
-  variantSection: { marginBottom: 28 },
-  variantGrid: { display: 'flex', flexWrap: 'wrap', gap: 10 },
-  variantCard: {
-    border: '1px solid #e2e8f0', borderRadius: 10,
-    padding: '12px 16px', background: '#f8fafc', minWidth: 100,
-  },
-  variantName: { fontSize: 11, color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase' },
-  variantValue: { fontSize: 16, fontWeight: 700, margin: '4px 0' },
-  variantPrice: { fontSize: 12, color: '#2563eb' },
-  variantStock: { fontSize: 12, color: '#64748b', marginTop: 2 },
-  actions: { display: 'flex', gap: 12 },
-  btnEdit: {
-    background: '#2563eb', color: '#fff', border: 'none',
-    borderRadius: 8, padding: '12px 28px', cursor: 'pointer',
-    fontWeight: 600, fontSize: 15,
-  },
-  center: { display: 'flex', justifyContent: 'center', padding: '80px 0' },
-  spinner: {
-    width: 36, height: 36, border: '3px solid #e2e8f0',
-    borderTop: '3px solid #2563eb', borderRadius: '50%',
-  },
-  errorBox: {
-    background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca',
-    borderRadius: 8, padding: '14px 18px', margin: 32,
-  },
-};

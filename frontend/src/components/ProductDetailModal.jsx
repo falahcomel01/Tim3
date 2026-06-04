@@ -1,117 +1,403 @@
-import { useState } from 'react';
-import { X, Star, Check } from 'lucide-react';
-import bannerImg from '../assets/banner.jpeg';
-import kaos2 from '../assets/kaos2.jpeg';
-import kaos3 from '../assets/kaos3.jpeg';
-import kaos4 from '../assets/kaos4.jpeg';
+import { useState } from "react";
+import {
+  X,
+  Star,
+  ShoppingCart,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
-function ProductDetailModal({ product, onClose }) {
+function formatRupiah(number) {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+  }).format(number || 0);
+}
+
+export default function ProductDetailModal({
+  product,
+  onClose,
+}) {
+  const [activeImage, setActiveImage] = useState(0);
+  const [selectedVariant, setSelectedVariant] =
+    useState(product?.variants?.[0] || null);
+
   if (!product) return null;
 
-  const [selectedSize, setSelectedSize] = useState('L');
+  const images = product.images || [];
+  const variants = product.variants || [];
 
-  // Image source matcher to represent actual local assets
-  const getProductImage = (productId) => {
-    if (productId === 1) return bannerImg; // Kaos Oversize (sunset image!)
-    if (productId === 2) return kaos2; // Hoodie
-    if (productId === 3) return kaos3; // Tote Bag
-    if (productId === 4) return kaos4; // Kaos Polo
-    return bannerImg;
+  const imageUrl = (url) => {
+    if (!url)
+      return "https://via.placeholder.com/500x500?text=No+Image";
+
+    return `http://localhost:8000${url}`;
   };
 
+  const nextImage = () => {
+    if (images.length <= 1) return;
+
+    setActiveImage((prev) =>
+      prev === images.length - 1 ? 0 : prev + 1
+    );
+  };
+
+  const prevImage = () => {
+    if (images.length <= 1) return;
+
+    setActiveImage((prev) =>
+      prev === 0 ? images.length - 1 : prev - 1
+    );
+  };
+
+  const currentPrice = selectedVariant
+    ? selectedVariant.price
+    : product.price;
+
+  const currentStock = selectedVariant
+    ? selectedVariant.stock
+    : product.stock;
+
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ background: '#111216', border: '1px solid rgba(255,255,255,0.06)' }}>
-        <button 
-          className="close-btn modal-close-corner" 
-          onClick={onClose} 
-          aria-label="Tutup detail modal"
-          style={{ background: '#1c1d24', color: '#94a3b8', border: 'none', padding: '8px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 9999,
+        background: "rgba(0,0,0,.8)",
+        backdropFilter: "blur(6px)",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: "24px",
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: "100%",
+          maxWidth: "1000px",
+          background: "#121318",
+          borderRadius: "20px",
+          overflow: "hidden",
+          border:
+            "1px solid rgba(255,255,255,.08)",
+          display: "flex",
+          position: "relative",
+        }}
+      >
+        {/* CLOSE */}
+        <button
+          onClick={onClose}
+          style={{
+            position: "absolute",
+            top: 15,
+            right: 15,
+            width: 40,
+            height: 40,
+            borderRadius: "50%",
+            border: "none",
+            background: "rgba(255,255,255,.08)",
+            color: "#fff",
+            cursor: "pointer",
+            zIndex: 99,
+          }}
         >
           <X size={18} />
         </button>
 
-        <div className="modal-grid">
-          <div className="modal-image-panel" style={{ background: '#191a20' }}>
-            <img 
-              src={getProductImage(product.id)} 
-              alt={product.name} 
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-            />
+        {/* IMAGE SECTION */}
+        <div
+          style={{
+            width: "45%",
+            background: "#0f172a",
+            position: "relative",
+          }}
+        >
+          <img
+            src={
+              images.length
+                ? imageUrl(
+                    images[activeImage]?.url
+                  )
+                : "https://via.placeholder.com/500"
+            }
+            alt={product.name}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+            }}
+          />
+
+          {images.length > 1 && (
+            <>
+              <button
+                onClick={prevImage}
+                style={{
+                  position: "absolute",
+                  left: 10,
+                  top: "50%",
+                  transform:
+                    "translateY(-50%)",
+                  width: 40,
+                  height: 40,
+                  borderRadius: "50%",
+                  border: "none",
+                  background:
+                    "rgba(0,0,0,.5)",
+                  color: "#fff",
+                  cursor: "pointer",
+                }}
+              >
+                <ChevronLeft size={18} />
+              </button>
+
+              <button
+                onClick={nextImage}
+                style={{
+                  position: "absolute",
+                  right: 10,
+                  top: "50%",
+                  transform:
+                    "translateY(-50%)",
+                  width: 40,
+                  height: 40,
+                  borderRadius: "50%",
+                  border: "none",
+                  background:
+                    "rgba(0,0,0,.5)",
+                  color: "#fff",
+                  cursor: "pointer",
+                }}
+              >
+                <ChevronRight size={18} />
+              </button>
+            </>
+          )}
+
+          {/* THUMBNAILS */}
+          {images.length > 1 && (
+            <div
+              style={{
+                position: "absolute",
+                bottom: 12,
+                left: 12,
+                right: 12,
+                display: "flex",
+                gap: 8,
+                overflowX: "auto",
+              }}
+            >
+              {images.map((img, index) => (
+                <img
+                  key={img.id}
+                  src={imageUrl(img.url)}
+                  alt=""
+                  onClick={() =>
+                    setActiveImage(index)
+                  }
+                  style={{
+                    width: 65,
+                    height: 65,
+                    objectFit: "cover",
+                    borderRadius: 8,
+                    cursor: "pointer",
+                    border:
+                      activeImage === index
+                        ? "2px solid #f59e0b"
+                        : "2px solid transparent",
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* DETAIL */}
+        <div
+          style={{
+            flex: 1,
+            padding: "32px",
+            overflowY: "auto",
+            maxHeight: "90vh",
+          }}
+        >
+          <h2
+            style={{
+              color: "#fff",
+              marginBottom: 12,
+              fontSize: 28,
+              fontWeight: 800,
+            }}
+          >
+            {product.name}
+          </h2>
+
+          <div
+            style={{
+              fontSize: 24,
+              fontWeight: 700,
+              color: "#f59e0b",
+              marginBottom: 12,
+            }}
+          >
+            {formatRupiah(currentPrice)}
           </div>
 
-          <div className="modal-details">
-            <span style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--primary)', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: '8px', display: 'block', fontWeight: '700' }}>
-              {product.tag}
-            </span>
-            
-            <h3 className="modal-title" style={{ fontSize: '22px', fontWeight: '800', color: '#ffffff', marginBottom: '8px' }}>
-              {product.name}
-            </h3>
-            
-            <span className="modal-price" style={{ fontSize: '20px', fontWeight: '800', color: 'var(--primary)', marginBottom: '14px', display: 'block' }}>
-              Rp {product.price.toLocaleString('id-ID')}
-            </span>
+          <div
+            style={{
+              display: "flex",
+              gap: 4,
+              marginBottom: 16,
+            }}
+          >
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Star
+                key={i}
+                size={16}
+                fill="#f59e0b"
+                color="#f59e0b"
+              />
+            ))}
+          </div>
 
-            <div className="product-rating" style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="star-icon" size={14} style={{ fill: '#ff9800', color: '#ff9800' }} />
-              ))}
-              <span className="rating-count" style={{ fontSize: '12px', color: '#64748b', marginLeft: '6px' }}>
-                ({product.reviews} ulasan pembeli)
-              </span>
-            </div>
+          <p
+            style={{
+              color: "#94a3b8",
+              lineHeight: 1.7,
+              marginBottom: 24,
+            }}
+          >
+            {product.description}
+          </p>
 
-            <p className="modal-description" style={{ fontSize: '14px', lineHeight: '1.6', color: '#94a3b8', marginBottom: '20px' }}>
-              {product.description}
-            </p>
-
-            {/* Size Selector Dial */}
-            <div style={{ marginBottom: '24px' }}>
-              <h4 style={{ fontSize: '12px', textTransform: 'uppercase', fontFamily: 'monospace', color: '#ffffff', marginBottom: '10px', letterSpacing: '1px' }}>
-                Pilih Ukuran Kaos:
+          {/* VARIANT */}
+          {variants.length > 0 && (
+            <>
+              <h4
+                style={{
+                  color: "#fff",
+                  marginBottom: 12,
+                }}
+              >
+                Pilih Varian
               </h4>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                {['S', 'M', 'L', 'XL', 'XXL'].map((sz) => (
+
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 10,
+                  marginBottom: 24,
+                }}
+              >
+                {variants.map((variant) => (
                   <button
-                    key={sz}
-                    onClick={() => setSelectedSize(sz)}
+                    key={variant.id}
+                    onClick={() =>
+                      setSelectedVariant(
+                        variant
+                      )
+                    }
                     style={{
-                      width: '40px',
-                      height: '40px',
-                      borderRadius: '8px',
-                      border: '1px solid',
-                      borderColor: selectedSize === sz ? 'var(--primary)' : 'rgba(255, 255, 255, 0.08)',
-                      background: selectedSize === sz ? 'rgba(245, 158, 11, 0.1)' : 'rgba(255,255,255,0.02)',
-                      color: selectedSize === sz ? 'var(--primary)' : '#cbd5e1',
-                      fontWeight: '700',
-                      cursor: 'pointer',
-                      fontSize: '13px',
-                      transition: 'all 0.2s'
+                      padding:
+                        "10px 14px",
+                      borderRadius: 10,
+                      border:
+                        selectedVariant?.id ===
+                        variant.id
+                          ? "1px solid #f59e0b"
+                          : "1px solid rgba(255,255,255,.1)",
+                      background:
+                        selectedVariant?.id ===
+                        variant.id
+                          ? "rgba(245,158,11,.15)"
+                          : "#1e1f24",
+                      color: "#fff",
+                      cursor: "pointer",
                     }}
                   >
-                    {sz}
+                    <div>
+                      {variant.name}
+                    </div>
+
+                    <div
+                      style={{
+                        fontSize: 12,
+                        color: "#f59e0b",
+                      }}
+                    >
+                      {formatRupiah(
+                        variant.price
+                      )}
+                    </div>
                   </button>
                 ))}
               </div>
-            </div>
+            </>
+          )}
 
-            <h4 style={{ fontSize: '12px', textTransform: 'uppercase', fontFamily: 'monospace', color: '#ffffff', marginBottom: '10px', letterSpacing: '1px' }}>
-              Spesifikasi Kaos:
-            </h4>
-            <ul style={{ listStyle: 'none', marginBottom: '28px' }}>
-              {product.features.map((feat, index) => (
-                <li key={index} style={{ fontSize: '13px', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                  <Check size={14} style={{ color: 'var(--primary)' }} />
-                  {feat}
-                </li>
-              ))}
-            </ul>
+          <div
+            style={{
+              marginBottom: 24,
+            }}
+          >
+            <span
+              style={{
+                padding:
+                  "6px 12px",
+                borderRadius: 20,
+                background:
+                  currentStock > 0
+                    ? "rgba(74,222,128,.1)"
+                    : "rgba(239,68,68,.1)",
+                color:
+                  currentStock > 0
+                    ? "#4ade80"
+                    : "#ef4444",
+                fontWeight: 600,
+              }}
+            >
+              Stok : {currentStock}
+            </span>
           </div>
+
+          <button
+            disabled={currentStock <= 0}
+            style={{
+              width: "100%",
+              padding: "14px",
+              borderRadius: 12,
+              border: "none",
+              background:
+                currentStock > 0
+                  ? "#f59e0b"
+                  : "#334155",
+              color:
+                currentStock > 0
+                  ? "#000"
+                  : "#94a3b8",
+              fontWeight: 700,
+              cursor:
+                currentStock > 0
+                  ? "pointer"
+                  : "not-allowed",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
+            <ShoppingCart size={16} />
+            {currentStock > 0
+              ? "Tambah ke Keranjang"
+              : "Stok Habis"}
+          </button>
         </div>
       </div>
     </div>
   );
 }
-
-export default ProductDetailModal;
