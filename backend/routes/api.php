@@ -5,8 +5,7 @@ use App\Http\Controllers\API\CategoryController;
 use App\Http\Controllers\API\ProductController;
 use App\Http\Controllers\API\ProductImageController;
 use App\Http\Controllers\API\ProductVariantController;
-use App\Http\Controllers\API\Admin\CustomerService\AdminCustomerServiceConversationController;
-use App\Http\Controllers\API\CustomerService\CustomerServiceConversationController;
+use App\Http\Controllers\API\CustomerServiceConversationController;
 use App\Http\Controllers\API\RolePermissionController;
 use App\Http\Controllers\API\UserController;
 use Illuminate\Support\Facades\Route;
@@ -68,12 +67,12 @@ Route::middleware('auth:sanctum')->group(function () {
         // Assign role ke user (tetap ada untuk keperluan admin)
         Route::post('/users/{userId}/assign-role',    [RolePermissionController::class, 'assignRole']);
 
-        // Customer Service
-        Route::prefix('customer-service')->group(function () {
-            Route::get('/conversations', [AdminCustomerServiceConversationController::class, 'index']);
-            Route::get('/conversations/{conversation}', [AdminCustomerServiceConversationController::class, 'show']);
-            Route::post('/conversations/{conversation}/messages', [AdminCustomerServiceConversationController::class, 'sendMessage']);
-            Route::patch('/conversations/{conversation}/status', [AdminCustomerServiceConversationController::class, 'updateStatus']);
+        Route::middleware('auth:sanctum')->prefix('customer-service')->group(function () {
+            Route::get('/conversations',                        [CustomerServiceConversationController::class, 'index']);
+            Route::post('/conversations',                       [CustomerServiceConversationController::class, 'store']);
+            Route::get('/conversations/{conversation}',         [CustomerServiceConversationController::class, 'show']);
+            Route::post('/conversations/{conversation}/messages', [CustomerServiceConversationController::class, 'sendMessage']);
+            Route::patch('/conversations/{conversation}/status',  [CustomerServiceConversationController::class, 'updateStatus']);
         });
     });
 
