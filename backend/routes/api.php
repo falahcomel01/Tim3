@@ -8,6 +8,8 @@ use App\Http\Controllers\API\ProductVariantController;
 use App\Http\Controllers\API\CustomerServiceConversationController;
 use App\Http\Controllers\API\RolePermissionController;
 use App\Http\Controllers\API\UserController;
+use App\Http\Controllers\API\DashboardController;
+ use App\Http\Controllers\Dev\DummyDataController;
 use Illuminate\Support\Facades\Route;
 
 // ==================== PUBLIC ROUTES ====================
@@ -66,7 +68,17 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Assign role ke user (tetap ada untuk keperluan admin)
         Route::post('/users/{userId}/assign-role',    [RolePermissionController::class, 'assignRole']);
-
+        
+        // ==================== DASHBOARD ====================
+        Route::prefix('dashboard')->group(function () {
+            Route::get('/summary', [DashboardController::class, 'summary']);
+            Route::get('/revenue', [DashboardController::class, 'revenue']);
+            Route::get('/order-status', [DashboardController::class, 'orderStatus']);
+            Route::get('/top-products', [DashboardController::class, 'topProducts']);
+            Route::get('/low-stock', [DashboardController::class, 'lowStock']);
+            Route::get('/recent-orders', [DashboardController::class, 'recentOrders']);
+        });
+        
         Route::middleware('auth:sanctum')->prefix('customer-service')->group(function () {
             Route::get('/conversations',                        [CustomerServiceConversationController::class, 'index']);
             Route::post('/conversations',                       [CustomerServiceConversationController::class, 'store']);
@@ -103,4 +115,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/categories/{id}', [CategoryController::class, 'update']);
         Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);
     });
+});
+
+Route::prefix('dev/dashboard')->group(function () {
+
+    Route::get('/summary', [DummyDataController::class, 'summary']);
+    Route::get('/revenue', [DummyDataController::class, 'revenue']);
+    Route::get('/order-status', [DummyDataController::class, 'orderStatus']);
+    Route::get('/top-products', [DummyDataController::class, 'topProducts']);
+    Route::get('/low-stock', [DummyDataController::class, 'lowStock']);
+    Route::get('/recent-orders', [DummyDataController::class, 'recentOrders']);
+
 });
