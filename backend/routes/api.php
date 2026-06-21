@@ -9,39 +9,34 @@ use App\Http\Controllers\API\CustomerServiceConversationController;
 use App\Http\Controllers\API\RolePermissionController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\DashboardController;
+use App\Http\Controllers\API\TransactionController;
  use App\Http\Controllers\Dev\DummyDataController;
 use Illuminate\Support\Facades\Route;
 
-// ==================== PUBLIC ROUTES ====================
 
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
 });
 
-// ==================== PUBLIC PRODUCTS ====================
 
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{id}', [ProductController::class, 'show']);
 
-// ==================== PUBLIC CATEGORIES ====================
 
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{id}', [CategoryController::class, 'show']);
 
 
-// ==================== PROTECTED ROUTES ====================
 
 Route::middleware('auth:sanctum')->group(function () {
 
-    // Auth
     Route::prefix('auth')->group(function () {
         Route::get('/profile', [AuthController::class, 'profile']);
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::post('/logout-all', [AuthController::class, 'logoutAll']);
     });
 
-    // Customer Service
     Route::prefix('customer-service')->group(function () {
         Route::get('/conversations', [CustomerServiceConversationController::class, 'index']);
         Route::post('/conversations', [CustomerServiceConversationController::class, 'store']);
@@ -49,7 +44,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/conversations/{conversation}/messages', [CustomerServiceConversationController::class, 'sendMessage']);
     });
 
-    // Admin only
+    Route::middleware('permission:view-orders')->prefix('transactions')->group(function () {
+        Route::get('/', [TransactionController::class, 'index']);
+        Route::get('/{order}', [TransactionController::class, 'show']);
+    });
+
     Route::middleware('role:admin')->prefix('admin')->group(function () {
 
         Route::get('/roles', [RolePermissionController::class, 'indexRoles']);
@@ -66,10 +65,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/users/{id}/change-password', [UserController::class, 'changePassword']);
         Route::delete('/users/{id}', [UserController::class, 'destroy']);
 
-        // Assign role ke user (tetap ada untuk keperluan admin)
         Route::post('/users/{userId}/assign-role',    [RolePermissionController::class, 'assignRole']);
         
-        // ==================== DASHBOARD ====================
         Route::prefix('dashboard')->group(function () {
             Route::get('/summary', [DashboardController::class, 'summary']);
             Route::get('/revenue', [DashboardController::class, 'revenue']);
@@ -77,6 +74,10 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/top-products', [DashboardController::class, 'topProducts']);
             Route::get('/low-stock', [DashboardController::class, 'lowStock']);
             Route::get('/recent-orders', [DashboardController::class, 'recentOrders']);
+        });
+
+        Route::prefix('transactions')->group(function () {
+            Route::get('/report', [TransactionController::class, 'report']);
         });
         
         Route::middleware('auth:sanctum')->prefix('customer-service')->group(function () {
@@ -88,7 +89,6 @@ Route::middleware('auth:sanctum')->group(function () {
         });
     });
 
-    // ==================== MANAGE PRODUCTS ====================
 
     Route::middleware('permission:manage-products')->group(function () {
 
@@ -107,7 +107,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/products/{product}/images/{image}', [ProductImageController::class, 'destroy']);
     });
 
-    // ==================== MANAGE CATEGORIES ====================
 
     Route::middleware('permission:manage-categories')->group(function () {
 
