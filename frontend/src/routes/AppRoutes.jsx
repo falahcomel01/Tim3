@@ -20,6 +20,7 @@ import AdminCustomerServicePage from '../pages/admin/customer-service/AdminCusto
 
 import ProdukPage from '../pages/admin/product/ProdukPage';
 import CategoryPage from '../pages/admin/categories/CategoryPage';
+import TransactionReportPage from '../pages/admin/transactions/TransactionReportPage';
 
 // Product Pages
 import ProductListPage from '../pages/product/ProductListPage';
@@ -115,6 +116,7 @@ export default function AppRoutes() {
         <Route element={<AdminRoute />}>
           <Route element={<AdminLayout />}>
             <Route path="/admin/dashboard"   element={<DashboardPage />} />
+            <Route path="/admin/transactions/report" element={<TransactionReportPage />} />
             <Route path="/admin/profile"     element={<ProfilePage />} />
             <Route path="/admin/roles"       element={<RolesPage />} />
             <Route path="/admin/permissions" element={<PermissionsPage />} />
