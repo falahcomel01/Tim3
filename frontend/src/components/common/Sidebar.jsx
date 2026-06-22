@@ -1,8 +1,9 @@
 import { NavLink } from 'react-router-dom';
-import { Headphones, LayoutDashboard, Shirt ,  User, Shield, Key, Users, X, StretchHorizontal, } from 'lucide-react';
+import { Headphones, LayoutDashboard, Shirt ,  User, Shield, Key, Users, X, StretchHorizontal, FileBarChart } from 'lucide-react';
 
 const menuItems = [
   { label: 'Dashboard',              icon: LayoutDashboard,  to: '/admin/dashboard' },
+  { label: 'Laporan Transaksi',      icon: FileBarChart,     to: '/admin/transactions/report' },
   { label: 'Manage Product',         icon: Shirt,            to: '/admin/product' },
   { label: 'Manage Categories ',     icon: StretchHorizontal,to: '/admin/categories' },
   { label: 'Profile',                icon: User,             to: '/admin/profile' },
