@@ -25,6 +25,8 @@ class RolePermissionSeeder extends Seeder
             'manage-permissions',
             'view-products',
             'manage-products',
+            'view-categories',
+            'manage-categories',
             'view-orders',
             'manage-orders',
         ];

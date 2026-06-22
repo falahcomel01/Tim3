@@ -12,22 +12,22 @@ export default function PermissionTable({ permissions, onDelete }) {
       />
     );
   }
-
+ 
   return (
     <div
       style={{
         overflowX: 'auto',
-        borderRadius: '12px',
+        borderRadius: '10px',
         backgroundColor: '#121318',
         border: '1px solid rgba(255,255,255,0.08)',
       }}
     >
-      <table className="w-full text-sm">
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
         <thead>
           <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-            <th className="text-left px-4 py-3 text-xs font-medium" style={{ color: '#64748b' }}>#</th>
-            <th className="text-left px-4 py-3 text-xs font-medium" style={{ color: '#64748b' }}>Nama Permission</th>
-            <th className="text-right px-4 py-3 text-xs font-medium" style={{ color: '#64748b' }}>Aksi</th>
+            <th style={thStyle}>#</th>
+            <th style={thStyle}>Nama Permission</th>
+            <th style={{ ...thStyle, textAlign: 'right' }}>Aksi</th>
           </tr>
         </thead>
         <tbody>
@@ -38,16 +38,22 @@ export default function PermissionTable({ permissions, onDelete }) {
               onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.02)'; }}
               onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
             >
-              <td className="px-4 py-3 text-xs" style={{ color: '#475569' }}>{idx + 1}</td>
-              <td className="px-4 py-3">
+              <td style={tdStyle}>
+                <span style={{ color: '#475569', fontSize: '12px' }}>{idx + 1}</span>
+              </td>
+              <td style={tdStyle}>
                 <Badge color="blue">{perm.name ?? perm}</Badge>
               </td>
-              <td className="px-4 py-3">
-                <div className="flex justify-end">
-                  <Button variant="danger" className="px-2.5 py-1.5 text-xs" onClick={() => onDelete(perm)}>
-                    <Trash2 size={13} /> Hapus
-                  </Button>
-                </div>
+              <td style={{ ...tdStyle, textAlign: 'right' }}>
+                <button
+                  onClick={() => onDelete(perm)}
+                  style={deleteBtnStyle}
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.2)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.1)'; }}
+                >
+                  <Trash2 size={12} />
+                  Hapus
+                </button>
               </td>
             </tr>
           ))}
@@ -56,3 +62,32 @@ export default function PermissionTable({ permissions, onDelete }) {
     </div>
   );
 }
+ 
+const thStyle = {
+  textAlign: 'left',
+  padding: '12px 16px',
+  fontSize: '11px',
+  fontWeight: '500',
+  color: '#64748b',
+  whiteSpace: 'nowrap',
+};
+ 
+const tdStyle = {
+  padding: '14px 16px',
+  verticalAlign: 'middle',
+};
+ 
+const deleteBtnStyle = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '5px',
+  padding: '5px 12px',
+  fontSize: '12px',
+  fontWeight: '500',
+  color: '#f87171',
+  backgroundColor: 'rgba(239,68,68,0.1)',
+  border: '1px solid rgba(239,68,68,0.2)',
+  borderRadius: '6px',
+  cursor: 'pointer',
+  transition: 'background-color 0.15s',
+};

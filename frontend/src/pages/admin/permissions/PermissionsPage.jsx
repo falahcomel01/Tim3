@@ -6,7 +6,6 @@ import PermissionTable from '../../../components/admin/permissions/PermissionTab
 import PermissionForm from '../../../components/admin/permissions/PermissionForm';
 import PermissionDeleteModal from '../../../components/admin/permissions/PermissionDeleteModal';
 import Modal from '../../../components/common/Modal';
-import Button from '../../../components/common/Button';
 import LoadingSpinner from '../../../components/common/LoadingSpinner';
 
 export default function PermissionsPage() {
@@ -59,16 +58,36 @@ export default function PermissionsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
           <h1 className="text-xl font-bold" style={{ color: '#ffffff' }}>Manajemen Permission</h1>
           <p className="text-sm mt-0.5" style={{ color: '#64748b' }}>{permissions.length} permission terdaftar</p>
         </div>
-        <Button onClick={() => setFormModal(true)}>
-          <Plus size={15} /> Tambah Permission
-        </Button>
+
+        <button
+          onClick={() => setFormModal(true)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '8px 16px',
+            backgroundColor: '#f59e0b',
+            color: '#1a1a1a',
+            fontWeight: '600',
+            fontSize: '13px',
+            borderRadius: '6px',
+            border: 'none',
+            cursor: 'pointer',
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#d97706'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#f59e0b'; }}
+        >
+          <Plus size={14} />
+          Tambah Permission
+        </button>
       </div>
 
       {/* Table */}

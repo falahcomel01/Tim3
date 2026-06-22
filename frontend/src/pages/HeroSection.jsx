@@ -16,17 +16,6 @@ function HeroSection({ scrollToId }) {
         <p className="hero-subtitle">
           Pilihan merchandise resmi Mahasiswa Sistem Informasi . Di realisasikan oleh Divisi Kewirausahaan <span className="siber-bold">SIBERMERCH 2025</span>
         </p>
-
-        <div className="hero-buttons">
-          <button 
-            onClick={() => scrollToId('katalog')} 
-            className="btn btn-primary"
-            style={{ minWidth: '220px', justifyContent: 'center' }}
-          >
-            <ShoppingBag size={16} /> Lihat Koleksi Kaos
-          </button>
-        </div>
-
         {/* Centered Banner Showcase */}
         <div className="hero-banner-wrapper">
           <img 

@@ -5,6 +5,7 @@ export default function App() {
   return (
     <>
       <AppRoutes />
+
       <Toaster
         position="top-right"
         toastOptions={{
@@ -16,10 +17,16 @@ export default function App() {
             fontSize: '13px',
           },
           success: {
-            iconTheme: { primary: '#f59e0b', secondary: '#121318' },
+            iconTheme: {
+              primary: '#f59e0b',
+              secondary: '#121318',
+            },
           },
           error: {
-            iconTheme: { primary: '#ef4444', secondary: '#121318' },
+            iconTheme: {
+              primary: '#ef4444',
+              secondary: '#121318',
+            },
           },
         }}
       />

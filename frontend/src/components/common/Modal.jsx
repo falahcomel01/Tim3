@@ -26,7 +26,7 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
       >
         {/* Header */}
         <div
-          className="flex items-center justify-between px-6 py-4"
+          className="flex items-center justify-between px-8 py-5"
           style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}
         >
           <h2 className="text-base font-semibold" style={{ color: '#ffffff' }}>{title}</h2>
@@ -42,7 +42,7 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
         </div>
 
         {/* Body */}
-        <div className="px-6 py-5">{children}</div>
+        <div className="px-10 py-9">{children}</div>
       </div>
     </div>
   );

@@ -7,7 +7,6 @@ import RoleTable from '../../../components/admin/roles/RoleTable';
 import RoleForm from '../../../components/admin/roles/RoleForm';
 import RoleDeleteModal from '../../../components/admin/roles/RoleDeleteModal';
 import Modal from '../../../components/common/Modal';
-import Button from '../../../components/common/Button';
 import LoadingSpinner from '../../../components/common/LoadingSpinner';
 
 export default function RolesPage() {
@@ -76,16 +75,35 @@ export default function RolesPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
           <h1 className="text-xl font-bold" style={{ color: '#ffffff' }}>Manajemen Role</h1>
           <p className="text-sm mt-0.5" style={{ color: '#64748b' }}>{roles.length} role terdaftar</p>
         </div>
-        <Button onClick={handleOpenCreate}>
-          <Plus size={15} /> Tambah Role
-        </Button>
+
+        {/* Tombol Tambah Role */}
+        <button
+          onClick={handleOpenCreate}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '8px 16px',
+            backgroundColor: '#f59e0b',
+            color: '#1a1a1a',
+            fontWeight: '600',
+            fontSize: '13px',
+            borderRadius: '6px',
+            border: 'none',
+            cursor: 'pointer',
+          }}
+        >
+          <Plus size={14} />
+          Tambah Role
+        </button>
       </div>
 
       {/* Table */}

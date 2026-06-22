@@ -6,7 +6,6 @@ import { toast } from 'react-hot-toast';
 import { User, Mail, Lock, UserPlus, Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
 import authService from '../../services/authService';
-import Button from '../common/Button';
 
 const schema = z.object({
   name:                  z.string().min(1, 'Nama wajib diisi').max(255),
@@ -20,39 +19,66 @@ const schema = z.object({
 
 const inputStyle = (hasError) => ({
   width: '100%',
-  paddingLeft: '2.25rem',
-  paddingRight: '1rem',
-  paddingTop: '0.625rem',
-  paddingBottom: '0.625rem',
-  borderRadius: '0.5rem',
-  fontSize: '0.875rem',
-  color: '#e2e8f0',
-  backgroundColor: 'rgba(255,255,255,0.05)',
-  border: `1px solid ${hasError ? '#ef4444' : 'rgba(255,255,255,0.1)'}`,
+  height: '52px',
+  paddingLeft: '48px',
+  paddingRight: '16px',
+  borderRadius: '14px',
+  background: 'rgba(255,255,255,0.04)',
+  border: `1px solid ${
+    hasError ? '#ef4444' : 'rgba(255,255,255,0.08)'
+  }`,
+  color: '#fff',
   outline: 'none',
-  transition: 'border-color 0.15s',
+  transition: 'all .3s ease',
 });
 
-function PasswordInput({ register: reg, name, placeholder, error, errors }) {
+function PasswordInput({ register: reg, name, placeholder, error }) {
   const [show, setShow] = useState(false);
+
   return (
-    <div className="relative">
-      <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#64748b' }} />
+    <div style={{ position: 'relative', marginBottom: '28px' }}>
+      <Lock
+        size={18}
+        style={{
+          position: 'absolute',
+          left: '0',
+          top: '50%',
+          transform: 'translateY(-50%)',
+          color: '#666',
+        }}
+      />
+
       <input
         {...reg(name)}
         type={show ? 'text' : 'password'}
         placeholder={placeholder}
-        style={{ ...inputStyle(!!error), paddingRight: '2.5rem' }}
-        onFocus={(e) => { e.target.style.borderColor = '#f59e0b'; }}
-        onBlur={(e) => { e.target.style.borderColor = error ? '#ef4444' : 'rgba(255,255,255,0.1)'; }}
+        style={{
+          width: '100%',
+          background: 'transparent',
+          border: 'none',
+          borderBottom: `1px solid ${error ? '#ef4444' : '#333'}`,
+          padding: '12px 40px',
+          color: '#fff',
+          fontSize: '18px',
+          outline: 'none',
+        }}
       />
+
       <button
         type="button"
         onClick={() => setShow(!show)}
-        className="absolute right-3 top-1/2 -translate-y-1/2"
-        style={{ color: '#64748b', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+        style={{
+          position: 'absolute',
+          right: 0,
+          top: '50%',
+          transform: 'translateY(-50%)',
+          background: 'none',
+          border: 'none',
+          color: '#666',
+          cursor: 'pointer',
+        }}
       >
-        {show ? <EyeOff size={15} /> : <Eye size={15} />}
+        {show ? <EyeOff size={18} /> : <Eye size={18} />}
       </button>
     </div>
   );
@@ -90,72 +116,278 @@ export default function RegisterForm() {
   };
 
   return (
-    <div className="px-8 py-8">
-      <div className="mb-7">
-        <h1 className="text-xl font-bold" style={{ color: '#ffffff' }}>Buat Akun Baru</h1>
-        <p className="text-sm mt-1" style={{ color: '#64748b' }}>Isi data di bawah untuk mendaftar</p>
-      </div>
+  <div
+    style={{
+      minHeight: '100vh',
+      display: 'flex',
+      background: '#050505',
+    }}
+  >
+    {/* LEFT SIDE */}
+    <div
+      style={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        padding: '80px',
+      }}
+    >
+      <h3
+        style={{
+          color: '#f7b500',
+          fontSize: '22px',
+          fontWeight: '700',
+          letterSpacing: '2px',
+          marginBottom: '25px',
+        }}
+      >
+        SIBER MERCH
+      </h3>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        {/* Name */}
-        <div>
-          <label className="block text-xs font-medium mb-1.5" style={{ color: '#94a3b8' }}>Nama Lengkap</label>
-          <div className="relative">
-            <User size={15} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#64748b' }} />
+      <h1
+        style={{
+          color: '#fff',
+          fontSize: '90px',
+          fontWeight: '900',
+          lineHeight: '0.95',
+          margin: 0,
+        }}
+      >
+        SIBER
+        <br />
+        <span style={{ color: '#f7b500' }}>
+          MERCH
+        </span>
+      </h1>
+
+      <h4
+        style={{
+          color: '#f7b500',
+          marginTop: '30px',
+          fontSize: '22px',
+          fontWeight: '600',
+        }}
+      >
+        OFFICIAL MERCHANDISE SISTEM INFORMASI
+      </h4>
+
+      <p
+        style={{
+          color: '#9ca3af',
+          maxWidth: '520px',
+          lineHeight: '1.8',
+          marginTop: '20px',
+          fontSize: '16px',
+        }}
+      >
+        Merchandise resmi Himpunan Mahasiswa Sistem Informasi
+        dengan desain premium, modern, dan eksklusif untuk
+        mahasiswa yang ingin tampil lebih percaya diri.
+      </p>
+    </div>
+
+    {/* RIGHT SIDE */}
+    <div
+      style={{
+        width: '480px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '30px',
+      }}
+    >
+      <div
+        style={{
+          width: '100%',
+          background: '#0b0b0d',
+          borderRadius: '28px',
+          padding: '40px',
+          boxShadow: '0 0 30px rgba(245,158,11,.12)',
+        }}
+      >
+        <div style={{ textAlign: 'center', marginBottom: '35px' }}>
+          <h2
+            style={{
+              color: '#fff',
+              fontSize: '28px',
+              fontWeight: '400',
+              marginBottom: '12px',
+            }}
+          >
+            REGISTER <span style={{ color: '#f7b500' }}>ACCOUNT</span>
+          </h2>
+
+          <div
+            style={{
+              width: '60px',
+              height: '3px',
+              background: '#f7b500',
+              margin: '0 auto',
+              borderRadius: '999px',
+            }}
+          />
+        </div>
+
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div style={{ position: 'relative', marginBottom: '25px' }}>
+            <User
+              size={18}
+              style={{
+                position: 'absolute',
+                left: 0,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: '#666',
+              }}
+            />
+
             <input
               {...register('name')}
               type="text"
-              placeholder="John Doe"
-              style={inputStyle(!!errors.name)}
-              onFocus={(e) => { e.target.style.borderColor = '#f59e0b'; }}
-              onBlur={(e) => { e.target.style.borderColor = errors.name ? '#ef4444' : 'rgba(255,255,255,0.1)'; }}
+              placeholder="Masukkan Nama Lengkap"
+              style={{
+                width: '100%',
+                background: 'transparent',
+                border: 'none',
+                borderBottom: `1px solid ${errors.name ? '#ef4444' : '#333'}`,
+                padding: '12px 0 12px 40px',
+                color: '#fff',
+                fontSize: '16px',
+                outline: 'none',
+              }}
             />
-          </div>
-          {errors.name && <p className="text-xs mt-1" style={{ color: '#f87171' }}>{errors.name.message}</p>}
-        </div>
 
-        {/* Email */}
-        <div>
-          <label className="block text-xs font-medium mb-1.5" style={{ color: '#94a3b8' }}>Email</label>
-          <div className="relative">
-            <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#64748b' }} />
+            {errors.name && (
+              <p style={{ color: '#ef4444', fontSize: '12px', marginTop: '5px' }}>
+                {errors.name.message}
+              </p>
+            )}
+          </div>
+
+          <div style={{ position: 'relative', marginBottom: '25px' }}>
+            <Mail
+              size={18}
+              style={{
+                position: 'absolute',
+                left: 0,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: '#666',
+              }}
+            />
+
             <input
               {...register('email')}
               type="email"
-              placeholder="john@example.com"
-              style={inputStyle(!!errors.email)}
-              onFocus={(e) => { e.target.style.borderColor = '#f59e0b'; }}
-              onBlur={(e) => { e.target.style.borderColor = errors.email ? '#ef4444' : 'rgba(255,255,255,0.1)'; }}
+              placeholder="Masukkan Email"
+              style={{
+                width: '100%',
+                background: 'transparent',
+                border: 'none',
+                borderBottom: `1px solid ${errors.email ? '#ef4444' : '#333'}`,
+                padding: '12px 0 12px 40px',
+                color: '#fff',
+                fontSize: '16px',
+                outline: 'none',
+              }}
             />
+
+            {errors.email && (
+              <p style={{ color: '#ef4444', fontSize: '12px', marginTop: '5px' }}>
+                {errors.email.message}
+              </p>
+            )}
           </div>
-          {errors.email && <p className="text-xs mt-1" style={{ color: '#f87171' }}>{errors.email.message}</p>}
-        </div>
 
-        {/* Password */}
-        <div>
-          <label className="block text-xs font-medium mb-1.5" style={{ color: '#94a3b8' }}>Password</label>
-          <PasswordInput register={register} name="password" placeholder="Min. 8 karakter" error={errors.password} />
-          {errors.password && <p className="text-xs mt-1" style={{ color: '#f87171' }}>{errors.password.message}</p>}
-        </div>
+          <PasswordInput
+            register={register}
+            name="password"
+            placeholder="Masukkan Password"
+            error={errors.password}
+          />
 
-        {/* Confirm Password */}
-        <div>
-          <label className="block text-xs font-medium mb-1.5" style={{ color: '#94a3b8' }}>Konfirmasi Password</label>
-          <PasswordInput register={register} name="password_confirmation" placeholder="Ulangi password" error={errors.password_confirmation} />
-          {errors.password_confirmation && <p className="text-xs mt-1" style={{ color: '#f87171' }}>{errors.password_confirmation.message}</p>}
-        </div>
+          {errors.password && (
+            <p
+              style={{
+                color: '#ef4444',
+                fontSize: '12px',
+                marginTop: '-18px',
+                marginBottom: '18px',
+              }}
+            >
+              {errors.password.message}
+            </p>
+          )}
 
-        <Button type="submit" loading={loading} className="w-full py-2.5 mt-2">
-          <UserPlus size={15} /> Daftar
-        </Button>
-      </form>
+          <PasswordInput
+            register={register}
+            name="password_confirmation"
+            placeholder="Konfirmasi Password"
+            error={errors.password_confirmation}
+          />
 
-      <p className="text-center text-xs mt-6" style={{ color: '#64748b' }}>
-        Sudah punya akun?{' '}
-        <Link to="/login" className="font-medium" style={{ color: '#fbbf24' }}>
-          Masuk di sini
-        </Link>
-      </p>
+          {errors.password_confirmation && (
+            <p
+              style={{
+                color: '#ef4444',
+                fontSize: '12px',
+                marginTop: '-18px',
+                marginBottom: '18px',
+              }}
+            >
+              {errors.password_confirmation.message}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              width: '100%',
+              height: '56px',
+              marginTop: '20px',
+              border: 'none',
+              borderRadius: '14px',
+              background: '#f7b500',
+              color: '#000',
+              fontSize: '18px',
+              fontWeight: '700',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '10px',
+            }}
+          >
+            <UserPlus size={20} />
+            {loading ? 'LOADING...' : 'REGISTER'}
+          </button>
+        </form>
+
+        <p
+          style={{
+            textAlign: 'center',
+            marginTop: '25px',
+            color: '#777',
+            fontSize: '14px',
+          }}
+        >
+          Sudah punya akun?
+          <Link
+            to="/login"
+            style={{
+              color: '#f7b500',
+              fontWeight: '600',
+              marginLeft: '5px',
+              textDecoration: 'none',
+            }}
+          >
+            Login sekarang
+          </Link>
+        </p>
+      </div>
     </div>
-  );
+  </div>
+);
 }

@@ -37,14 +37,6 @@ export default function CustomerHomePage() {
     <>
       <HeroSection scrollToId={scrollToId} />
       <AboutSection />
-      <ProductSection
-        products={productsData}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        activeCategory={activeCategory}
-        setActiveCategory={setActiveCategory}
-        onQuickView={setActiveQuickView}
-      />
       {activeQuickView && (
         <ProductDetailModal
           product={activeQuickView}

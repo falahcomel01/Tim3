@@ -1,6 +1,5 @@
 import { Pencil, Trash2 } from 'lucide-react';
 import Badge from '../../common/Badge';
-import Button from '../../common/Button';
 import EmptyState from '../../common/EmptyState';
 
 export default function RoleTable({ roles, onEdit, onDelete }) {
@@ -17,18 +16,18 @@ export default function RoleTable({ roles, onEdit, onDelete }) {
     <div
       style={{
         overflowX: 'auto',
-        borderRadius: '12px',
+        borderRadius: '10px',
         backgroundColor: '#121318',
         border: '1px solid rgba(255,255,255,0.08)',
       }}
     >
-      <table className="w-full text-sm">
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
         <thead>
           <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-            <th className="text-left px-4 py-3 text-xs font-medium" style={{ color: '#64748b' }}>#</th>
-            <th className="text-left px-4 py-3 text-xs font-medium" style={{ color: '#64748b' }}>Nama Role</th>
-            <th className="text-left px-4 py-3 text-xs font-medium" style={{ color: '#64748b' }}>Permissions</th>
-            <th className="text-right px-4 py-3 text-xs font-medium" style={{ color: '#64748b' }}>Aksi</th>
+            <th style={thStyle}>#</th>
+            <th style={thStyle}>Nama Role</th>
+            <th style={thStyle}>Permissions</th>
+            <th style={{ ...thStyle, textAlign: 'right' }}>Aksi</th>
           </tr>
         </thead>
         <tbody>
@@ -39,26 +38,40 @@ export default function RoleTable({ roles, onEdit, onDelete }) {
               onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.02)'; }}
               onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
             >
-              <td className="px-4 py-3 text-xs" style={{ color: '#475569' }}>{idx + 1}</td>
-              <td className="px-4 py-3">
+              <td style={tdStyle}>
+                <span style={{ color: '#475569', fontSize: '12px' }}>{idx + 1}</span>
+              </td>
+              <td style={tdStyle}>
                 <Badge color="amber">{role.name}</Badge>
               </td>
-              <td className="px-4 py-3">
-                <div className="flex flex-wrap gap-1">
+              <td style={{ ...tdStyle, maxWidth: '480px' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                   {role.permissions?.length > 0
                     ? role.permissions.map((p) => <Badge key={p} color="slate">{p}</Badge>)
-                    : <span className="text-xs" style={{ color: '#334155' }}>—</span>
+                    : <span style={{ fontSize: '12px', color: '#334155' }}>—</span>
                   }
                 </div>
               </td>
-              <td className="px-4 py-3">
-                <div className="flex items-center justify-end gap-2">
-                  <Button variant="ghost" className="px-2.5 py-1.5 text-xs" onClick={() => onEdit(role)}>
-                    <Pencil size={13} /> Edit
-                  </Button>
-                  <Button variant="danger" className="px-2.5 py-1.5 text-xs" onClick={() => onDelete(role)}>
-                    <Trash2 size={13} /> Hapus
-                  </Button>
+              <td style={{ ...tdStyle, textAlign: 'right' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px' }}>
+                  <button
+                    onClick={() => onEdit(role)}
+                    style={editBtnStyle}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.08)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'; }}
+                  >
+                    <Pencil size={12} />
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => onDelete(role)}
+                    style={deleteBtnStyle}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.2)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.1)'; }}
+                  >
+                    <Trash2 size={12} />
+                    Hapus
+                  </button>
                 </div>
               </td>
             </tr>
@@ -68,3 +81,47 @@ export default function RoleTable({ roles, onEdit, onDelete }) {
     </div>
   );
 }
+
+const thStyle = {
+  textAlign: 'left',
+  padding: '12px 16px',
+  fontSize: '11px',
+  fontWeight: '500',
+  color: '#64748b',
+  whiteSpace: 'nowrap',
+};
+
+const tdStyle = {
+  padding: '14px 16px',
+  verticalAlign: 'middle',
+};
+
+const editBtnStyle = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '5px',
+  padding: '5px 12px',
+  fontSize: '12px',
+  fontWeight: '500',
+  color: '#e2e8f0',
+  backgroundColor: 'rgba(255,255,255,0.04)',
+  border: '1px solid rgba(255,255,255,0.08)',
+  borderRadius: '6px',
+  cursor: 'pointer',
+  transition: 'background-color 0.15s',
+};
+
+const deleteBtnStyle = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '5px',
+  padding: '5px 12px',
+  fontSize: '12px',
+  fontWeight: '500',
+  color: '#f87171',
+  backgroundColor: 'rgba(239,68,68,0.1)',
+  border: '1px solid rgba(239,68,68,0.2)',
+  borderRadius: '6px',
+  cursor: 'pointer',
+  transition: 'background-color 0.15s',
+};
